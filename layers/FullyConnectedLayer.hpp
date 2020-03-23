@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FullyConnectedLayer.hpp"
+#include "Layer.hpp"
 
 using namespace std;
 
