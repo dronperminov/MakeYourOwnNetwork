@@ -31,8 +31,10 @@ int main() {
 	int epochs = 10000; // число эпох
 
 	Network network(2); // создаём сеть из двух входов
-	network.AddLayer(5, "tanh"); // добавляем слой из 5 нейронов
-	network.AddLayer(1, "sigmoid"); // добавляем слой из одного нейрона
+	network.AddLayer("fc 5"); // добавляем слой из 5 нейронов
+	network.AddLayer("activation tanh"); // добавляем слой активации
+	network.AddLayer("fc 1"); // добавляем слой из одного нейрона
+	network.AddLayer("activation sigmoid"); // добавляем слой активации
 
 	network.Train(trainData, learningRate, epochs, 1000); // обучаем
 

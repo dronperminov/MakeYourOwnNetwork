@@ -1,9 +1,12 @@
 #pragma once
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 #include <cmath>
 #include "Layers/Layer.hpp"
 #include "Layers/FullyConnectedLayer.hpp"
+#include "Layers/ActivationLayer.hpp"
 
 using namespace std;
 
@@ -25,7 +28,7 @@ class Network {
 public:
 	Network(int inputs); // создание сети
 	
-	void AddLayer(int outputs, const string& function); // добавление слоя
+	void AddLayer(const string &config); // добавление слоя
 	void Print() const; // вывод коэффициентов
 	void Train(const NetworkData &data, double learningRate, int epochs, int log_period); // обучение
 	
@@ -74,9 +77,24 @@ void Network::UpdateWeights(double learningRate) {
 }
 
 // добавление слоя
-void Network::AddLayer(int outputs, const string& function) {
-	layers.push_back(new FullyConnectedLayer(this->outputs, outputs, function)); // добавляем слой
-	this->outputs = outputs; // обновляем число выходов сети
+void Network::AddLayer(const string &config) {
+	stringstream ss(config);
+	string type;
+	ss >> type;
+
+	if (type == "activation") {
+		string function;
+		ss >> function;
+		layers.push_back(new ActivationLayer(this->outputs, this->outputs, function)); // добавляем слой
+	}
+	else if (type == "fc") {
+		int outputs;
+		ss >> outputs;
+
+		layers.push_back(new FullyConnectedLayer(this->outputs, outputs)); // добавляем слой
+		this->outputs = outputs; // обновляем число выходов сети
+	}
+
 	last++; // увеличиваем индекс последнего слоя
 }
 

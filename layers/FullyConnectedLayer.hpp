@@ -5,17 +5,15 @@
 using namespace std;
 
 class FullyConnectedLayer : public Layer {
-	string function; // тип активационной функции
 	vector<vector<double>> w; // матрица весовых коэффициентов
 	vector<double> b; // вектор весов смещения
 	
 	vector<vector<double>> dw; // градиенты весовых коэффициентов
 	vector<double> db; // градиенты весов смещения
-	vector<double> df; // градиенты функции активации
 
 	void InitializeWeights(); // инициализация весовых коэффициентов
 public:	
-	FullyConnectedLayer(int inputs, int outputs, const string &function); // создание слоя
+	FullyConnectedLayer(int inputs, int outputs); // создание слоя
 
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
@@ -24,12 +22,7 @@ public:
 	void PrintWeights() const; // вывод весовых коэффициентов
 };
 
-FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs, const string &function) : Layer(inputs, outputs) {
-	this->function = function; // запоминаем функцию активации
-
-	if (function != "sigmoid" && function != "tanh" && function != "relu")
-		throw runtime_error("unknown function");
-
+FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs) : Layer(inputs, outputs) {
 	// выделяем память под весовые коэффициенты и выходной вектор
 	w = vector<vector<double>>(outputs, vector<double>(inputs));
 	b = vector<double>(outputs);
@@ -37,7 +30,6 @@ FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs, const string &
 	// выделяем место под градиенты
 	dw = vector<vector<double>>(outputs, vector<double>(inputs));
 	db = vector<double>(outputs);
-	df = vector<double>(outputs, 0);
 
 	InitializeWeights();
 }
@@ -60,19 +52,7 @@ vector<double> FullyConnectedLayer::Forward(const vector<double> &x) {
 		for (int j = 0; j < inputs; j++)
 			y += w[i][j] * x[j];
 
-		// применяем функцию активации
-		if (function == "sigmoid") {
-			output[i] = 1.0 / (exp(-y) + 1);
-			df[i] = output[i] * (1 - output[i]);
-		}
-		else if (function == "tanh") {
-			output[i] = tanh(y);
-			df[i] = 1 - output[i] * output[i];
-		}
-		else if (function == "relu") {
-			output[i] = y > 0 ? y : 0;
-			df[i] = output[i] > 0 ? 1 : 0;
-		}
+		output[i] = y;
 	}
 
 	return output; // возвращаем результирующий вектор
@@ -80,15 +60,12 @@ vector<double> FullyConnectedLayer::Forward(const vector<double> &x) {
 
 // обратное распространение
 vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vector<double> &dout) {
-	for (int i = 0; i < outputs; i++)
-		df[i] *= dout[i]; // умножаем градиенты активации на выходные градиенты
-
 	// считаем градиенты весовых коэффициентов
 	for (int i = 0; i < outputs; i++) {
 		for (int j = 0; j < inputs; j++)
-			dw[i][j] = df[i] * x[j];
+			dw[i][j] = dout[i] * x[j];
 
-		db[i] = df[i];
+		db[i] = dout[i];
 	}
 
 	// считаем градиенты по входам
@@ -96,7 +73,7 @@ vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vect
 		dx[i] = 0;
 
 		for (int j = 0; j < outputs; j++)
-			dx[i] += w[j][i] * df[j];
+			dx[i] += w[j][i] * dout[j];
 	}
 
 	return dx; // возвращаем градиенты по входам
