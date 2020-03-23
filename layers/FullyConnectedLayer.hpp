@@ -1,30 +1,21 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include <cmath>
+
+#include "FullyConnectedLayer.hpp"
 
 using namespace std;
 
-class Layer {
-	int inputs; // количество входов
-	int outputs; // количество выходов
+class FullyConnectedLayer : public Layer {
 	string function; // тип активационной функции
 	vector<vector<double>> w; // матрица весовых коэффициентов
 	vector<double> b; // вектор весов смещения
-	vector<double> output; // выходной вектор
-
+	
 	vector<vector<double>> dw; // градиенты весовых коэффициентов
 	vector<double> db; // градиенты весов смещения
 	vector<double> df; // градиенты функции активации
-	vector<double> dx; // градиенты входов
 
-	double GetRnd(double a, double b); // получение случайного числа
 	void InitializeWeights(); // инициализация весовых коэффициентов
 public:	
-	Layer(int inputs, int outputs, const string &function); // создание слоя
-
-	vector<double> GetOutput() const; // получение выходов
-	vector<double> GetDx() const; // получение градиентов входов
+	FullyConnectedLayer(int inputs, int outputs, const string &function); // создание слоя
 
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
@@ -33,9 +24,7 @@ public:
 	void PrintWeights() const; // вывод весовых коэффициентов
 };
 
-Layer::Layer(int inputs, int outputs, const string &function) {
-	this->inputs = inputs; // запоминаем число входов
-	this->outputs = outputs; // запоминаем число выходов
+FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs, const string &function) : Layer(inputs, outputs) {
 	this->function = function; // запоминаем функцию активации
 
 	if (function != "sigmoid" && function != "tanh" && function != "relu")
@@ -44,24 +33,17 @@ Layer::Layer(int inputs, int outputs, const string &function) {
 	// выделяем память под весовые коэффициенты и выходной вектор
 	w = vector<vector<double>>(outputs, vector<double>(inputs));
 	b = vector<double>(outputs);
-	output = vector<double>(outputs, 0);
 
 	// выделяем место под градиенты
 	dw = vector<vector<double>>(outputs, vector<double>(inputs));
 	db = vector<double>(outputs);
 	df = vector<double>(outputs, 0);
-	dx = vector<double>(inputs, 0);
 
 	InitializeWeights();
 }
 
-// получение случайного числа
-double Layer::GetRnd(double a, double b) {
-	return a + ((b - a) * rand()) / RAND_MAX;
-}
-
 // инициализация весовых коэффициентов
-void Layer::InitializeWeights() {
+void FullyConnectedLayer::InitializeWeights() {
 	for (int i = 0; i < outputs; i++) {
 		for (int j = 0; j < inputs; j++)
 			w[i][j] = GetRnd(-0.5, 0.5);
@@ -70,18 +52,8 @@ void Layer::InitializeWeights() {
 	}
 }
 
-// получение выходов
-vector<double> Layer::GetOutput() const {
-	return output;
-}
-
-// получение градиентов входов
-vector<double> Layer::GetDx() const {
-	return dx;
-}
-
 // прямое распространение
-vector<double> Layer::Forward(const vector<double> &x) {	
+vector<double> FullyConnectedLayer::Forward(const vector<double> &x) {	
 	for (int i = 0; i < outputs; i++) {
 		double y = b[i];
 		
@@ -107,7 +79,7 @@ vector<double> Layer::Forward(const vector<double> &x) {
 }
 
 // обратное распространение
-vector<double> Layer::Backward(const vector<double> &x, const vector<double> &dout) {
+vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vector<double> &dout) {
 	for (int i = 0; i < outputs; i++)
 		df[i] *= dout[i]; // умножаем градиенты активации на выходные градиенты
 
@@ -131,7 +103,7 @@ vector<double> Layer::Backward(const vector<double> &x, const vector<double> &do
 }
 
 // обновление весовых коэффициентов
-void Layer::UpdateWeights(double learningRate) {
+void FullyConnectedLayer::UpdateWeights(double learningRate) {
 	for (int i = 0; i < outputs; i++) {
 		for (int j = 0; j < inputs; j++)
 			w[i][j] -= learningRate * dw[i][j]; // выполняем шаг градиентного спуска для веса
@@ -141,7 +113,7 @@ void Layer::UpdateWeights(double learningRate) {
 }
 
 // вывод весовых коэффициентов
-void Layer::PrintWeights() const {
+void FullyConnectedLayer::PrintWeights() const {
 	for (int i = 0; i < outputs; i++) {
 		for (int j = 0; j < inputs; j++)
 			cout << w[i][j] << " ";

@@ -2,7 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "Layer.hpp"
+#include "Layers/Layer.hpp"
+#include "Layers/FullyConnectedLayer.hpp"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ class Network {
 	int inputs; // число входов
 	int outputs; // число выходов
 	int last; // индекс последнего слоя
-	vector<Layer> layers; // слои
+	vector<Layer*> layers; // слои
 
 	void Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение ошибки
 	double CalculateLoss(const vector<double> &y, const vector<double> &t, vector<double> &dout); // вычисление ошибки
@@ -41,16 +42,16 @@ Network::Network(int inputs) {
 // обратное распространение ошибки
 void Network::Backward(const vector<double> &x, const vector<double> &dout) {
 	if (last == 0) {
-		layers[last].Backward(x, dout);
+		layers[last]->Backward(x, dout);
 		return;
 	}
 
-	layers[last].Backward(layers[last - 1].GetOutput(), dout); // обрабатываем последний слой
+	layers[last]->Backward(layers[last - 1]->GetOutput(), dout); // обрабатываем последний слой
 
 	for (int i = last - 1; i >= 1; i--)
-		layers[i].Backward(layers[i - 1].GetOutput(), layers[i + 1].GetDx()); // обрабатываем промежуточные слои
+		layers[i]->Backward(layers[i - 1]->GetOutput(), layers[i + 1]->GetDx()); // обрабатываем промежуточные слои
 
-	layers[0].Backward(x, layers[1].GetDx()); // обрабатываем первый слой
+	layers[0]->Backward(x, layers[1]->GetDx()); // обрабатываем первый слой
 }
 
 // вычисление ошибки
@@ -69,12 +70,12 @@ double Network::CalculateLoss(const vector<double> &y, const vector<double> &t, 
 // обновление весовых коэффициентов
 void Network::UpdateWeights(double learningRate) {
 	for (int i = 0; i < layers.size(); i++)
-		layers[i].UpdateWeights(learningRate); // обновляем веса у каждого из слоёв
+		layers[i]->UpdateWeights(learningRate); // обновляем веса у каждого из слоёв
 }
 
 // добавление слоя
 void Network::AddLayer(int outputs, const string& function) {
-	layers.push_back(Layer(this->outputs, outputs, function)); // добавляем слой
+	layers.push_back(new FullyConnectedLayer(this->outputs, outputs, function)); // добавляем слой
 	this->outputs = outputs; // обновляем число выходов сети
 	last++; // увеличиваем индекс последнего слоя
 }
@@ -83,7 +84,7 @@ void Network::AddLayer(int outputs, const string& function) {
 void Network::Print() const {
 	for (int i = 0; i < layers.size(); i++) {
 		cout << "layer " << i << ": " << endl;
-		layers[i].PrintWeights();
+		layers[i]->PrintWeights();
 	}
 }
 
@@ -109,11 +110,11 @@ void Network::Train(const NetworkData& data, double learningRate, int epochs, in
 
 // прямое распространение
 vector<double> Network::Forward(const vector<double> &x) {
-	layers[0].Forward(x); // выполняем распространение в первом слое
+	layers[0]->Forward(x); // выполняем распространение в первом слое
 
 	// распространяем сигналы по остальным слоям
 	for (int i = 1; i < layers.size(); i++)
-		layers[i].Forward(layers[i - 1].GetOutput());
+		layers[i]->Forward(layers[i - 1]->GetOutput());
 
-	return layers[last].GetOutput(); // возвращаем выход последнего слоя
+	return layers[last]->GetOutput(); // возвращаем выход последнего слоя
 }
