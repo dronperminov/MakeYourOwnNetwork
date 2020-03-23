@@ -7,6 +7,7 @@
 #include "Layers/Layer.hpp"
 #include "Layers/FullyConnectedLayer.hpp"
 #include "Layers/ActivationLayer.hpp"
+#include "Layers/SoftmaxLayer.hpp"
 
 using namespace std;
 
@@ -93,6 +94,9 @@ void Network::AddLayer(const string &config) {
 
 		layers.push_back(new FullyConnectedLayer(this->outputs, outputs)); // добавляем слой
 		this->outputs = outputs; // обновляем число выходов сети
+	}
+	else if (type == "softmax") {
+		layers.push_back(new SoftmaxLayer(this->outputs, this->outputs));
 	}
 
 	last++; // увеличиваем индекс последнего слоя
