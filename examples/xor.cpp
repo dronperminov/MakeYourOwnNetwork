@@ -36,7 +36,7 @@ int main() {
 	network.AddLayer("fc 1"); // добавляем слой из одного нейрона
 	network.AddLayer("activation sigmoid"); // добавляем слой активации
 
-	network.Train(trainData, learningRate, epochs, 1000); // обучаем
+	network.Train(trainData, MSE, learningRate, epochs, 1000); // обучаем
 
 	// выводим результат обучения
 	for (int i = 0; i < trainData.x.size(); i++) {

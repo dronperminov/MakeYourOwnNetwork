@@ -67,7 +67,7 @@ int main() {
 	// network.AddLayer("activation sigmoid"); // добавляем слой активации
 	network.AddLayer("softmax"); // добавляем softmax слой
 
-	network.Train(trainData, learningRate, epochs, 100); // обучаем
+	network.Train(trainData, MSE, learningRate, epochs, 100); // обучаем
 
 	double correctTest = 0;
 	double correctTrain = 0;
