@@ -31,24 +31,25 @@ double Test(Network &network, const NetworkData& data) {
 }
 
 int main() {
-	DataLoader loader("../datasets/mnist.txt");
-	NetworkData trainData = loader.LoadData("../datasets/mnist_train.csv");
-	NetworkData testData = loader.LoadData("../datasets/mnist_test.csv");
+	DataLoader loader("../datasets/mnist/mnist.txt");
+	NetworkData trainData = loader.LoadData("../datasets/mnist/mnist_train.csv");
+	NetworkData testData = loader.LoadData("../datasets/mnist/mnist_test.csv");
 
 	Network network(784);
 	network.AddLayer("fc 100");
 	network.AddLayer("activation sigmoid");
 	network.AddLayer("fc 10");
-	network.AddLayer("activation sigmoid");
+	network.AddLayer("softmax");
 
 	double learningRate = 0.08;
 	int epochs = 20;
 	int testPeriod = 5;
+	LossFunction loss = CrossEntropy;
 
 	cout << "Init accuracy: " << Test(network, testData) << endl;
 
 	for (int i = 0; i < epochs / testPeriod; i++) {
-		network.Train(trainData, learningRate, testPeriod, 1);
+		network.Train(trainData, loss, learningRate, testPeriod, 1);
 		
 		cout << "Train accuracy: " << Test(network, trainData) << endl;
 		cout << " Test accuracy: " << Test(network, testData) << endl;

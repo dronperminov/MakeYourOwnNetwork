@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <cmath>
+
+#include "utils/LossFunction.hpp"
 #include "Layers/Layer.hpp"
 #include "Layers/FullyConnectedLayer.hpp"
 #include "Layers/ActivationLayer.hpp"
@@ -23,7 +25,6 @@ class Network {
 	vector<Layer*> layers; // слои
 
 	void Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение ошибки
-	double CalculateLoss(const vector<double> &y, const vector<double> &t, vector<double> &dout); // вычисление ошибки
 	void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 public:
@@ -31,7 +32,7 @@ public:
 	
 	void AddLayer(const string &config); // добавление слоя
 	void Print() const; // вывод коэффициентов
-	void Train(const NetworkData &data, double learningRate, int epochs, int log_period); // обучение
+	void Train(const NetworkData &data, LossFunction L, double learningRate, int epochs, int log_period); // обучение
 	
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 };
@@ -56,19 +57,6 @@ void Network::Backward(const vector<double> &x, const vector<double> &dout) {
 		layers[i]->Backward(layers[i - 1]->GetOutput(), layers[i + 1]->GetDx()); // обрабатываем промежуточные слои
 
 	layers[0]->Backward(x, layers[1]->GetDx()); // обрабатываем первый слой
-}
-
-// вычисление ошибки
-double Network::CalculateLoss(const vector<double> &y, const vector<double> &t, vector<double> &dout) {
-	double loss = 0;
-
-	for (int i = 0; i < outputs; i++) {
-		double e = y[i] - t[i]; // находим разность между элементами
-		dout[i] = 2 * e; // записываем производную функции ошибки
-		loss += e * e; // добавляем ошибку
-	}
-
-	return loss; // возвращаем ошибку
 }
 
 // обновление весовых коэффициентов
@@ -111,7 +99,7 @@ void Network::Print() const {
 }
 
 // обучение сети
-void Network::Train(const NetworkData& data, double learningRate, int epochs, int log_period) {
+void Network::Train(const NetworkData& data, LossFunction L, double learningRate, int epochs, int log_period) {
 
 	for (int epoch = 0; epoch < epochs; epoch++) {
 		double loss = 0;
@@ -119,7 +107,7 @@ void Network::Train(const NetworkData& data, double learningRate, int epochs, in
 		for (int i = 0; i < data.x.size(); i++) {
 			vector<double> out = Forward(data.x[i]); // выполняем прямое распространение
 			vector<double> dout(outputs); // создаём вектор производных функции потерь
-			loss += CalculateLoss(out, data.y[i], dout); // вычисляем функцию потерь
+			loss += L(out, data.y[i], dout); // вычисляем функцию потерь
 			Backward(data.x[i], dout); // выполняем обратное распространение
 			UpdateWeights(learningRate); // обновляем весовые коэффициенты
 		}
