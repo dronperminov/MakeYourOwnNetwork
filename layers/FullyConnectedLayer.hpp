@@ -63,9 +63,9 @@ vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vect
 	// считаем градиенты весовых коэффициентов
 	for (int i = 0; i < outputs; i++) {
 		for (int j = 0; j < inputs; j++)
-			dw[i][j] = dout[i] * x[j];
+			dw[i][j] += dout[i] * x[j];
 
-		db[i] = dout[i];
+		db[i] += dout[i];
 	}
 
 	// считаем градиенты по входам
@@ -82,10 +82,13 @@ vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vect
 // обновление весовых коэффициентов
 void FullyConnectedLayer::UpdateWeights(double learningRate) {
 	for (int i = 0; i < outputs; i++) {
-		for (int j = 0; j < inputs; j++)
+		for (int j = 0; j < inputs; j++) {
 			w[i][j] -= learningRate * dw[i][j]; // выполняем шаг градиентного спуска для веса
+			dw[i][j] = 0;
+		}
 
 		b[i] -= learningRate * db[i]; // выполняем шаг градиентного спуска для смещения
+		db[i] = 0;
 	}
 }
 

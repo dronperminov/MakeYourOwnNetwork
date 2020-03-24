@@ -32,7 +32,7 @@ public:
 	
 	void AddLayer(const string &config); // добавление слоя
 	void Print() const; // вывод коэффициентов
-	void Train(const NetworkData &data, LossFunction L, double learningRate, int epochs, int log_period); // обучение
+	void Train(const NetworkData &data, LossFunction L, double learningRate, int batchSize, int epochs, int log_period); // обучение
 	
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 };
@@ -99,17 +99,20 @@ void Network::Print() const {
 }
 
 // обучение сети
-void Network::Train(const NetworkData& data, LossFunction L, double learningRate, int epochs, int log_period) {
+void Network::Train(const NetworkData& data, LossFunction L, double learningRate, int batchSize, int epochs, int log_period) {
 
 	for (int epoch = 0; epoch < epochs; epoch++) {
 		double loss = 0;
 
-		for (int i = 0; i < data.x.size(); i++) {
-			vector<double> out = Forward(data.x[i]); // выполняем прямое распространение
-			vector<double> dout(outputs); // создаём вектор производных функции потерь
-			loss += L(out, data.y[i], dout); // вычисляем функцию потерь
-			Backward(data.x[i], dout); // выполняем обратное распространение
-			UpdateWeights(learningRate); // обновляем весовые коэффициенты
+		for (int i = 0; i < data.x.size(); i += batchSize) {
+			for (int j = 0; j < batchSize && i + j < data.x.size(); j++) {
+				vector<double> out = Forward(data.x[i + j]); // выполняем прямое распространение
+				vector<double> dout(outputs); // создаём вектор производных функции потерь
+				loss += L(out, data.y[i + j], dout); // вычисляем функцию потерь
+				Backward(data.x[i + j], dout); // выполняем обратное распространение
+			}
+
+			UpdateWeights(learningRate / batchSize); // обновляем весовые коэффициенты
 		}
 
 		// если нужно

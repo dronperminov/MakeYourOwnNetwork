@@ -42,15 +42,16 @@ int main() {
 	network.AddLayer("softmax");
 
 	double learningRate = 0.08;
-	int epochs = 20;
+	int batchSize = 4;
+	int epochs = 40;
 	int testPeriod = 5;
 	LossFunction loss = CrossEntropy;
 
 	cout << "Init accuracy: " << Test(network, testData) << endl;
 
 	for (int i = 0; i < epochs / testPeriod; i++) {
-		network.Train(trainData, loss, learningRate, testPeriod, 1);
-		
+		network.Train(trainData, loss, learningRate, batchSize, testPeriod, 1);
+
 		cout << "Train accuracy: " << Test(network, trainData) << endl;
 		cout << " Test accuracy: " << Test(network, testData) << endl;
 	}

@@ -55,6 +55,7 @@ int Argmax(const vector<double> &v) {
 
 int main() {
 	double learningRate = 0.5; // скорость обучения
+	int batchSize = 1; // размер батча
 	int epochs = 1000; // число эпох
 	int n = 100;
 	NetworkData trainData = InitData(n); // задаём обучающие данные для классификации
@@ -67,7 +68,7 @@ int main() {
 	// network.AddLayer("activation sigmoid"); // добавляем слой активации
 	network.AddLayer("softmax"); // добавляем softmax слой
 
-	network.Train(trainData, MSE, learningRate, epochs, 100); // обучаем
+	network.Train(trainData, MSE, learningRate, batchSize, epochs, 100); // обучаем
 
 	double correctTest = 0;
 	double correctTrain = 0;

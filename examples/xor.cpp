@@ -28,6 +28,7 @@ int main() {
 	};
 
 	double learningRate = 0.5; // скорость обучения
+	int batchSize = 1; // размер батча
 	int epochs = 10000; // число эпох
 
 	Network network(2); // создаём сеть из двух входов
@@ -36,7 +37,7 @@ int main() {
 	network.AddLayer("fc 1"); // добавляем слой из одного нейрона
 	network.AddLayer("activation sigmoid"); // добавляем слой активации
 
-	network.Train(trainData, MSE, learningRate, epochs, 1000); // обучаем
+	network.Train(trainData, MSE, learningRate, batchSize, epochs, 1000); // обучаем
 
 	// выводим результат обучения
 	for (int i = 0; i < trainData.x.size(); i++) {
