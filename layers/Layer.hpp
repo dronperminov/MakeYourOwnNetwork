@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <cmath>
 
@@ -25,6 +26,7 @@ public:
 	virtual void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 	virtual void PrintWeights() const; // вывод весовых коэффициентов
+	virtual void Summary() const = 0; // вывод информации
 };
 
 Layer::Layer(int inputs, int outputs) {

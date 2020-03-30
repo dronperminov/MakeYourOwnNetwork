@@ -10,6 +10,8 @@ public:
 
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
+
+	void Summary() const; // вывод информации	
 };
 
 SoftmaxLayer::SoftmaxLayer(int inputs, int outputs) : Layer(inputs, outputs) {
@@ -41,4 +43,9 @@ vector<double> SoftmaxLayer::Backward(const vector<double> &x, const vector<doub
 	}
 
 	return dx; // возвращаем градиенты по входам
+}
+
+// вывод информации
+void SoftmaxLayer::Summary() const {
+	cout << "|              softmax | "  << setw(12) << inputs << " | " << setw(13) << outputs << " | " << setw(13) << (0) << " |" << endl;
 }

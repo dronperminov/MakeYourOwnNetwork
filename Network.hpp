@@ -35,6 +35,7 @@ public:
 	void Train(const NetworkData &data, LossFunction L, double learningRate, int batchSize, int epochs, int log_period); // обучение
 	
 	vector<double> Forward(const vector<double> &x); // прямое распространение
+	void Summary() const;
 };
 
 // создание сети
@@ -130,4 +131,15 @@ vector<double> Network::Forward(const vector<double> &x) {
 		layers[i]->Forward(layers[i - 1]->GetOutput());
 
 	return layers[last]->GetOutput(); // возвращаем выход последнего слоя
+}
+
+void Network::Summary() const {
+	cout << "+----------------------+--------------+---------------+---------------+" << endl;
+	cout << "|      layer name      | inputs count | outputs count | weights count |" << endl;
+	cout << "+----------------------+--------------+---------------+---------------+" << endl;
+
+	for (int i = 0; i < layers.size(); i++)
+		layers[i]->Summary();
+
+	cout << "+----------------------+--------------+---------------+---------------+" << endl;
 }

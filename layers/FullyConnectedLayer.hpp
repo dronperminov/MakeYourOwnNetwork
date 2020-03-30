@@ -20,6 +20,7 @@ public:
 	void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 	void PrintWeights() const; // вывод весовых коэффициентов
+	void Summary() const; // вывод информации
 };
 
 FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs) : Layer(inputs, outputs) {
@@ -100,4 +101,9 @@ void FullyConnectedLayer::PrintWeights() const {
 
 		cout << b[i] << endl;
 	}
+}
+
+// вывод информации
+void FullyConnectedLayer::Summary() const {
+	cout << "|      fully connected | " << setw(12) << inputs << " | " << setw(13) << outputs << " | " << setw(13) << ((inputs + 1) * outputs) << " |" << endl;
 }
