@@ -18,6 +18,7 @@ class DataLoader {
 public:
 	DataLoader(const string &path); // создание загрузчика
 	NetworkData LoadData(const string &path); // считывание данных
+	NetworkData FastLoadData(const string &path); // быстрое считывание данных
 };
 
 // создание загрузчика
@@ -70,7 +71,7 @@ vector<double> DataLoader::PixelsToVector(const vector<string> &values) const {
 	vector<double> x(width * height, 0);
 
 	for (int i = 1; i < values.size(); i++)
-		x[i - 1] = stod(values[i]) / 255.0;
+		x[i - 1] = atoi(values[i].c_str()) / 255.0;
 
 	return x;
 }
@@ -86,7 +87,7 @@ vector<double> DataLoader::LabelToVector(const string &label) const {
 		}
 	}
 
-	throw runtime_error("invalid label");
+	throw runtime_error("invalid label '" + label + "'");
 }
 
 // загрузка данных
@@ -111,7 +112,6 @@ NetworkData DataLoader::LoadData(const string &path) {
 
 		data.x.push_back(PixelsToVector(values)); // добавляем вектор изображения
 		data.y.push_back(LabelToVector(values[0])); // добавляем вектор метки
-		cout << "load " << data.x.size() << " lines\r"; // выводим, сколько уже строк обработано
 	}
 
 	f.close(); // закрываем файл
