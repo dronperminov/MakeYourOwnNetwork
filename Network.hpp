@@ -4,14 +4,20 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <chrono>
 
 #include "utils/LossFunction.hpp"
 #include "Layers/Layer.hpp"
 #include "Layers/FullyConnectedLayer.hpp"
+#include "Layers/DropoutLayer.hpp"
 #include "Layers/ActivationLayer.hpp"
 #include "Layers/SoftmaxLayer.hpp"
 
 using namespace std;
+
+typedef chrono::high_resolution_clock Time;
+typedef chrono::time_point<Time> TimePoint;
+typedef chrono::milliseconds ms;
 
 struct NetworkData {
 	vector<vector<double>> x;
@@ -24,6 +30,7 @@ class Network {
 	int last; // индекс последнего слоя
 	vector<Layer*> layers; // слои
 
+	vector<double> ForwardTrain(const vector<double> &x); // прямое распространение
 	void Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение ошибки
 	void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
@@ -43,6 +50,17 @@ Network::Network(int inputs) {
 	this->inputs = inputs; // запоминаем число входов
 	this->outputs = inputs; // нет слоёв
 	this->last = -1; // ещё нет слоёв
+}
+
+// прямое распространение
+vector<double> Network::ForwardTrain(const vector<double> &x) {
+	layers[0]->ForwardTrain(x); // выполняем распространение в первом слое
+
+	// распространяем сигналы по остальным слоям
+	for (int i = 1; i < layers.size(); i++)
+		layers[i]->ForwardTrain(layers[i - 1]->GetOutput());
+
+	return layers[last]->GetOutput(); // возвращаем выход последнего слоя
 }
 
 // обратное распространение ошибки
@@ -75,7 +93,7 @@ void Network::AddLayer(const string &config) {
 	if (type == "activation") {
 		string function;
 		ss >> function;
-		layers.push_back(new ActivationLayer(this->outputs, this->outputs, function)); // добавляем слой
+		layers.push_back(new ActivationLayer(this->outputs, function)); // добавляем слой
 	}
 	else if (type == "fc") {
 		int outputs;
@@ -85,8 +103,15 @@ void Network::AddLayer(const string &config) {
 		this->outputs = outputs; // обновляем число выходов сети
 	}
 	else if (type == "softmax") {
-		layers.push_back(new SoftmaxLayer(this->outputs, this->outputs));
+		layers.push_back(new SoftmaxLayer(this->outputs));
 	}
+	else if (type == "dropout") {
+		double p;
+		ss >> p;
+		layers.push_back(new DropoutLayer(this->outputs, p));
+	}
+	else
+		throw runtime_error("unknown layer '" + type + "'");
 
 	last++; // увеличиваем индекс последнего слоя
 }
@@ -101,13 +126,13 @@ void Network::Print() const {
 
 // обучение сети
 void Network::Train(const NetworkData& data, LossFunction L, double learningRate, int batchSize, int epochs, int log_period) {
-
 	for (int epoch = 0; epoch < epochs; epoch++) {
 		double loss = 0;
+		TimePoint t0 = Time::now();
 
 		for (int i = 0; i < data.x.size(); i += batchSize) {
 			for (int j = 0; j < batchSize && i + j < data.x.size(); j++) {
-				vector<double> out = Forward(data.x[i + j]); // выполняем прямое распространение
+				vector<double> out = ForwardTrain(data.x[i + j]); // выполняем прямое распространение
 				vector<double> dout(outputs); // создаём вектор производных функции потерь
 				loss += L(out, data.y[i + j], dout); // вычисляем функцию потерь
 				Backward(data.x[i + j], dout); // выполняем обратное распространение
@@ -116,9 +141,11 @@ void Network::Train(const NetworkData& data, LossFunction L, double learningRate
 			UpdateWeights(learningRate / batchSize); // обновляем весовые коэффициенты
 		}
 
+		ms d = std::chrono::duration_cast<ms>(Time::now() - t0);
+
 		// если нужно
 		if (epoch % log_period == 0 || epoch == epochs - 1)
-			cout << "Epoch: " << epoch << ", loss: " << loss << endl; // выводим текущую эпоху и ошибку
+			cout << "Epoch: " << epoch << ", loss: " << loss << ", epoch time: " << (d.count() / 1000.0) << " s" << endl; // выводим текущую эпоху и ошибку
 	}
 }
 

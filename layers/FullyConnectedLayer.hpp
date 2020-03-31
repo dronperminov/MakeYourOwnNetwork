@@ -6,10 +6,7 @@ using namespace std;
 
 class FullyConnectedLayer : public Layer {
 	vector<vector<double>> w; // матрица весовых коэффициентов
-	vector<double> b; // вектор весов смещения
-	
 	vector<vector<double>> dw; // градиенты весовых коэффициентов
-	vector<double> db; // градиенты весов смещения
 
 	void InitializeWeights(); // инициализация весовых коэффициентов
 public:	
@@ -24,13 +21,8 @@ public:
 };
 
 FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs) : Layer(inputs, outputs) {
-	// выделяем память под весовые коэффициенты и выходной вектор
-	w = vector<vector<double>>(outputs, vector<double>(inputs));
-	b = vector<double>(outputs);
-
-	// выделяем место под градиенты
-	dw = vector<vector<double>>(outputs, vector<double>(inputs));
-	db = vector<double>(outputs);
+	w = vector<vector<double>>(outputs, vector<double>(inputs + 1)); // выделяем память под весовые коэффициенты и выходной вектор
+	dw = vector<vector<double>>(outputs, vector<double>(inputs + 1)); // выделяем место под градиенты
 
 	InitializeWeights();
 }
@@ -41,14 +33,14 @@ void FullyConnectedLayer::InitializeWeights() {
 		for (int j = 0; j < inputs; j++)
 			w[i][j] = GetRnd(-0.5, 0.5);
 
-		b[i] = GetRnd(-0.5, 0.5); 
+		w[i][inputs] = GetRnd(-0.5, 0.5);
 	}
 }
 
 // прямое распространение
 vector<double> FullyConnectedLayer::Forward(const vector<double> &x) {	
 	for (int i = 0; i < outputs; i++) {
-		double y = b[i];
+		double y = w[i][inputs];
 		
 		for (int j = 0; j < inputs; j++)
 			y += w[i][j] * x[j];
@@ -66,7 +58,7 @@ vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vect
 		for (int j = 0; j < inputs; j++)
 			dw[i][j] += dout[i] * x[j];
 
-		db[i] += dout[i];
+		dw[i][inputs] += dout[i];
 	}
 
 	// считаем градиенты по входам
@@ -88,8 +80,8 @@ void FullyConnectedLayer::UpdateWeights(double learningRate) {
 			dw[i][j] = 0;
 		}
 
-		b[i] -= learningRate * db[i]; // выполняем шаг градиентного спуска для смещения
-		db[i] = 0;
+		w[i][inputs] -= learningRate * dw[i][inputs]; // выполняем шаг градиентного спуска для смещения
+		dw[i][inputs] = 0;
 	}
 }
 
@@ -99,7 +91,7 @@ void FullyConnectedLayer::PrintWeights() const {
 		for (int j = 0; j < inputs; j++)
 			cout << w[i][j] << " ";
 
-		cout << b[i] << endl;
+		cout << w[i][inputs] << endl;
 	}
 }
 

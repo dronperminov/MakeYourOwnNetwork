@@ -8,7 +8,7 @@ class ActivationLayer : public Layer {
 	string function; // тип активационной функции
 
 public:	
-	ActivationLayer(int inputs, int outputs, const string &function); // создание слоя
+	ActivationLayer(int outputs, const string &function); // создание слоя
 
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
@@ -16,8 +16,11 @@ public:
 	void Summary() const; // вывод информации
 };
 
-ActivationLayer::ActivationLayer(int inputs, int outputs, const string &function) : Layer(inputs, outputs) {
+ActivationLayer::ActivationLayer(int outputs, const string &function) : Layer(outputs, outputs) {
 	this->function = function; // запоминаем функцию активации
+
+	if (function != "sigmoid" && function != "tanh" && function != "relu")
+		throw runtime_error("unknown function '" + function + "'");
 }
 
 // прямое распространение

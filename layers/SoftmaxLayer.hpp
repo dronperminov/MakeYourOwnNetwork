@@ -6,7 +6,7 @@ using namespace std;
 
 class SoftmaxLayer : public Layer {
 public:	
-	SoftmaxLayer(int inputs, int outputs); // создание слоя
+	SoftmaxLayer(int outputs); // создание слоя
 
 	vector<double> Forward(const vector<double> &x); // прямое распространение
 	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
@@ -14,7 +14,7 @@ public:
 	void Summary() const; // вывод информации	
 };
 
-SoftmaxLayer::SoftmaxLayer(int inputs, int outputs) : Layer(inputs, outputs) {
+SoftmaxLayer::SoftmaxLayer(int outputs) : Layer(outputs, outputs) {
 	
 }
 
