@@ -12,9 +12,9 @@ class DropoutLayer : public Layer {
 public:	
 	DropoutLayer(int outputs, double p); // создание слоя
 
-	vector<double> ForwardTrain(const vector<double> &x); // прямое распространение
-	vector<double> Forward(const vector<double> &x); // прямое распространение
-	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
+	void ForwardTrain(const vector<double> &x); // прямое распространение
+	void Forward(const vector<double> &x); // прямое распространение
+	void Backward(const vector<double> &x, const vector<double> &dout, bool needDx); // обратное распространение
 
 	void Summary() const; // вывод информации	
 };
@@ -25,7 +25,7 @@ DropoutLayer::DropoutLayer(int outputs, double p) : Layer(outputs, outputs), dis
 }
 
 // прямое распространение
-vector<double> DropoutLayer::ForwardTrain(const vector<double> &x) {
+void DropoutLayer::ForwardTrain(const vector<double> &x) {
 	for (int i = 0; i < outputs; i++) {
 		if (distribution(generator)) {
 			output[i] = x[i] / q;
@@ -36,26 +36,23 @@ vector<double> DropoutLayer::ForwardTrain(const vector<double> &x) {
 			dx[i] = 0;
 		}
 	}
-
-	return output;
 }
 
 // прямое распространение
-vector<double> DropoutLayer::Forward(const vector<double> &x) {	
+void DropoutLayer::Forward(const vector<double> &x) {
 	for (int i = 0; i < outputs; i++) {
 		output[i] = x[i];
 		dx[i] = 1;
 	}
-
-	return output; // возвращаем результирующий вектор
 }
 
 // обратное распространение
-vector<double> DropoutLayer::Backward(const vector<double> &x, const vector<double> &dout) {
+void DropoutLayer::Backward(const vector<double> &x, const vector<double> &dout, bool needDx) {
+	if (!needDx)
+		return;
+
 	for (int i = 0; i < outputs; i++)
 		dx[i] *= dout[i];
-
-	return dx; // возвращаем градиенты по входам
 }
 
 // вывод информации

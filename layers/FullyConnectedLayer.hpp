@@ -12,8 +12,8 @@ class FullyConnectedLayer : public Layer {
 public:	
 	FullyConnectedLayer(int inputs, int outputs); // создание слоя
 
-	vector<double> Forward(const vector<double> &x); // прямое распространение
-	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
+	void Forward(const vector<double> &x); // прямое распространение
+	void Backward(const vector<double> &x, const vector<double> &dout, bool needDx); // обратное распространение
 	void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 	void PrintWeights() const; // вывод весовых коэффициентов
@@ -38,7 +38,7 @@ void FullyConnectedLayer::InitializeWeights() {
 }
 
 // прямое распространение
-vector<double> FullyConnectedLayer::Forward(const vector<double> &x) {	
+void FullyConnectedLayer::Forward(const vector<double> &x) {
 	for (int i = 0; i < outputs; i++) {
 		double y = w[i][inputs];
 		
@@ -47,12 +47,10 @@ vector<double> FullyConnectedLayer::Forward(const vector<double> &x) {
 
 		output[i] = y;
 	}
-
-	return output; // возвращаем результирующий вектор
 }
 
 // обратное распространение
-vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vector<double> &dout) {
+void FullyConnectedLayer::Backward(const vector<double> &x, const vector<double> &dout, bool needDx) {
 	// считаем градиенты весовых коэффициентов
 	for (int i = 0; i < outputs; i++) {
 		for (int j = 0; j < inputs; j++)
@@ -61,6 +59,9 @@ vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vect
 		dw[i][inputs] += dout[i];
 	}
 
+	if (!needDx)
+		return;
+
 	// считаем градиенты по входам
 	for (int i = 0; i < inputs; i++) {
 		dx[i] = 0;
@@ -68,8 +69,6 @@ vector<double> FullyConnectedLayer::Backward(const vector<double> &x, const vect
 		for (int j = 0; j < outputs; j++)
 			dx[i] += w[j][i] * dout[j];
 	}
-
-	return dx; // возвращаем градиенты по входам
 }
 
 // обновление весовых коэффициентов

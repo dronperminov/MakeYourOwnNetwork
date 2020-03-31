@@ -10,8 +10,8 @@ class ActivationLayer : public Layer {
 public:	
 	ActivationLayer(int outputs, const string &function); // создание слоя
 
-	vector<double> Forward(const vector<double> &x); // прямое распространение
-	vector<double> Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение
+	void Forward(const vector<double> &x); // прямое распространение
+	void Backward(const vector<double> &x, const vector<double> &dout, bool needDx); // обратное распространение
 
 	void Summary() const; // вывод информации
 };
@@ -24,7 +24,7 @@ ActivationLayer::ActivationLayer(int outputs, const string &function) : Layer(ou
 }
 
 // прямое распространение
-vector<double> ActivationLayer::Forward(const vector<double> &x) {	
+void ActivationLayer::Forward(const vector<double> &x) {
 	for (int i = 0; i < outputs; i++) {
 		// применяем функцию активации
 		if (function == "sigmoid") {
@@ -40,16 +40,15 @@ vector<double> ActivationLayer::Forward(const vector<double> &x) {
 			dx[i] = x[i] > 0 ? 1 : 0;
 		}
 	}
-
-	return output; // возвращаем результирующий вектор
 }
 
 // обратное распространение
-vector<double> ActivationLayer::Backward(const vector<double> &x, const vector<double> &dout) {
+void ActivationLayer::Backward(const vector<double> &x, const vector<double> &dout, bool needDx) {
+	if (!needDx)
+		return;
+
 	for (int i = 0; i < outputs; i++)
 		dx[i] *= dout[i]; // умножаем градиенты активации на выходные градиенты
-
-	return dx; // возвращаем градиенты по входам
 }
 
 // вывод информации

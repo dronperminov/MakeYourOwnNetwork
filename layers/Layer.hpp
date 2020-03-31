@@ -21,9 +21,9 @@ public:
 	vector<double> GetOutput() const; // получение выходов
 	vector<double> GetDx() const; // получение градиентов входов
 
-	virtual vector<double> ForwardTrain(const vector<double> &x); // прямое распространение (обучающий этап)
-	virtual vector<double> Forward(const vector<double> &x) = 0; // прямое распространение
-	virtual vector<double> Backward(const vector<double> &x, const vector<double> &dout) = 0; // обратное распространение
+	virtual void ForwardTrain(const vector<double> &x); // прямое распространение (обучающий этап)
+	virtual void Forward(const vector<double> &x) = 0; // прямое распространение
+	virtual void Backward(const vector<double> &x, const vector<double> &dout, bool needDx) = 0; // обратное распространение
 	virtual void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 	virtual void PrintWeights() const; // вывод весовых коэффициентов
@@ -53,8 +53,8 @@ vector<double> Layer::GetDx() const {
 	return dx;
 }
 
-vector<double> Layer::ForwardTrain(const vector<double> &x) {
-	return Forward(x);
+void Layer::ForwardTrain(const vector<double> &x) {
+	Forward(x);
 }
 
 // обновление весовых коэффициентов

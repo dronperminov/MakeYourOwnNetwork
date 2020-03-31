@@ -66,16 +66,16 @@ vector<double> Network::ForwardTrain(const vector<double> &x) {
 // обратное распространение ошибки
 void Network::Backward(const vector<double> &x, const vector<double> &dout) {
 	if (last == 0) {
-		layers[last]->Backward(x, dout);
+		layers[last]->Backward(x, dout, false);
 		return;
 	}
 
-	layers[last]->Backward(layers[last - 1]->GetOutput(), dout); // обрабатываем последний слой
+	layers[last]->Backward(layers[last - 1]->GetOutput(), dout, true); // обрабатываем последний слой
 
 	for (int i = last - 1; i >= 1; i--)
-		layers[i]->Backward(layers[i - 1]->GetOutput(), layers[i + 1]->GetDx()); // обрабатываем промежуточные слои
+		layers[i]->Backward(layers[i - 1]->GetOutput(), layers[i + 1]->GetDx(), true); // обрабатываем промежуточные слои
 
-	layers[0]->Backward(x, layers[1]->GetDx()); // обрабатываем первый слой
+	layers[0]->Backward(x, layers[1]->GetDx(), false); // обрабатываем первый слой
 }
 
 // обновление весовых коэффициентов
