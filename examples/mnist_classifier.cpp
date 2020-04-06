@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 #include "../Network.hpp"
 #include "../utils/DataLoader.hpp"
@@ -38,21 +39,25 @@ int main() {
 	Network network(784);
 	network.AddLayer("fc 100");
 	network.AddLayer("activation sigmoid");
+	network.AddLayer("dropout 0.2");
 	network.AddLayer("fc 10");
 	network.AddLayer("softmax");
 
+	cout << endl << "Configuration of network:" << endl;
+	network.Summary();
+
 	double learningRate = 0.08;
-	int batchSize = 4;
-	int epochs = 40;
+	int batchSize = 8;
+	int epochs = 100;
 	int testPeriod = 5;
 	LossFunction loss = CrossEntropy;
-
-	cout << "Init accuracy: " << Test(network, testData) << endl;
 
 	for (int i = 0; i < epochs / testPeriod; i++) {
 		network.Train(trainData, loss, learningRate, batchSize, testPeriod, 1);
 
-		cout << "Train accuracy: " << Test(network, trainData) << endl;
-		cout << " Test accuracy: " << Test(network, testData) << endl;
+		double trainAcc = Test(network, trainData);
+		double testAcc = Test(network, testData);
+
+		cout << "train acc: " << trainAcc << ", test acc: " << testAcc << endl;
 	}
 }
