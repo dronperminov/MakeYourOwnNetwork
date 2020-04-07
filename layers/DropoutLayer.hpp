@@ -12,9 +12,9 @@ class DropoutLayer : public Layer {
 public:	
 	DropoutLayer(int outputs, double p); // создание слоя
 
-	void ForwardTrain(const vector<double> &x); // прямое распространение
-	void Forward(const vector<double> &x); // прямое распространение
-	void Backward(const vector<double> &x, const vector<double> &dout, bool needDx); // обратное распространение
+	void ForwardTrain(const Tensor &x); // прямое распространение
+	void Forward(const Tensor &x); // прямое распространение
+	void Backward(const Tensor &x, const Tensor &dout, bool needDx); // обратное распространение
 
 	void Summary() const; // вывод информации	
 };
@@ -25,7 +25,7 @@ DropoutLayer::DropoutLayer(int outputs, double p) : Layer(outputs, outputs), dis
 }
 
 // прямое распространение
-void DropoutLayer::ForwardTrain(const vector<double> &x) {
+void DropoutLayer::ForwardTrain(const Tensor &x) {
 	for (int i = 0; i < outputs; i++) {
 		if (distribution(generator)) {
 			output[i] = x[i] / q;
@@ -39,7 +39,7 @@ void DropoutLayer::ForwardTrain(const vector<double> &x) {
 }
 
 // прямое распространение
-void DropoutLayer::Forward(const vector<double> &x) {
+void DropoutLayer::Forward(const Tensor &x) {
 	for (int i = 0; i < outputs; i++) {
 		output[i] = x[i];
 		dx[i] = 1;
@@ -47,7 +47,7 @@ void DropoutLayer::Forward(const vector<double> &x) {
 }
 
 // обратное распространение
-void DropoutLayer::Backward(const vector<double> &x, const vector<double> &dout, bool needDx) {
+void DropoutLayer::Backward(const Tensor &x, const Tensor &dout, bool needDx) {
 	if (!needDx)
 		return;
 

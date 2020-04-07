@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <vector>
 #include <cmath>
+#include "../utils/Tensor.hpp"
 
 using namespace std;
 
@@ -11,31 +12,28 @@ protected:
 	int inputs; // количество входов
 	int outputs; // количество выходов
 	
-	vector<double> output; // выходной вектор
-	vector<double> dx; // градиенты входов
+	Tensor output; // выходной вектор
+	Tensor dx; // градиенты входов
 
 	double GetRnd(double a, double b); // получение случайного числа
 public:
 	Layer(int inputs, int outputs);
 
-	vector<double> GetOutput() const; // получение выходов
-	vector<double> GetDx() const; // получение градиентов входов
+	Tensor GetOutput() const; // получение выходов
+	Tensor GetDx() const; // получение градиентов входов
 
-	virtual void ForwardTrain(const vector<double> &x); // прямое распространение (обучающий этап)
-	virtual void Forward(const vector<double> &x) = 0; // прямое распространение
-	virtual void Backward(const vector<double> &x, const vector<double> &dout, bool needDx) = 0; // обратное распространение
+	virtual void ForwardTrain(const Tensor &x); // прямое распространение (обучающий этап)
+	virtual void Forward(const Tensor &x) = 0; // прямое распространение
+	virtual void Backward(const Tensor &x, const Tensor &dout, bool needDx) = 0; // обратное распространение
 	virtual void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 	virtual void PrintWeights() const; // вывод весовых коэффициентов
 	virtual void Summary() const = 0; // вывод информации
 };
 
-Layer::Layer(int inputs, int outputs) {
+Layer::Layer(int inputs, int outputs) : output(outputs), dx(inputs) {
 	this->inputs = inputs; // запоминаем число входов
 	this->outputs = outputs; // запоминаем число выходов
-
-	output = vector<double>(outputs, 0); // выделяем память под выходной вектор
-	dx = vector<double>(inputs, 0); // выделяем место под градиенты
 }
 
 // получение случайного числа
@@ -44,16 +42,16 @@ double Layer::GetRnd(double a, double b) {
 }
 
 // получение выходов
-vector<double> Layer::GetOutput() const {
+Tensor Layer::GetOutput() const {
 	return output;
 }
 
 // получение градиентов входов
-vector<double> Layer::GetDx() const {
+Tensor Layer::GetDx() const {
 	return dx;
 }
 
-void Layer::ForwardTrain(const vector<double> &x) {
+void Layer::ForwardTrain(const Tensor &x) {
 	Forward(x);
 }
 

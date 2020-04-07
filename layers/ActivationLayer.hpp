@@ -10,8 +10,8 @@ class ActivationLayer : public Layer {
 public:	
 	ActivationLayer(int outputs, const string &function); // создание слоя
 
-	void Forward(const vector<double> &x); // прямое распространение
-	void Backward(const vector<double> &x, const vector<double> &dout, bool needDx); // обратное распространение
+	void Forward(const Tensor &x); // прямое распространение
+	void Backward(const Tensor &x, const Tensor &dout, bool needDx); // обратное распространение
 
 	void Summary() const; // вывод информации
 };
@@ -24,7 +24,7 @@ ActivationLayer::ActivationLayer(int outputs, const string &function) : Layer(ou
 }
 
 // прямое распространение
-void ActivationLayer::Forward(const vector<double> &x) {
+void ActivationLayer::Forward(const Tensor &x) {
 	for (int i = 0; i < outputs; i++) {
 		// применяем функцию активации
 		if (function == "sigmoid") {
@@ -43,7 +43,7 @@ void ActivationLayer::Forward(const vector<double> &x) {
 }
 
 // обратное распространение
-void ActivationLayer::Backward(const vector<double> &x, const vector<double> &dout, bool needDx) {
+void ActivationLayer::Backward(const Tensor &x, const Tensor &dout, bool needDx) {
 	if (!needDx)
 		return;
 

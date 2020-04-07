@@ -20,8 +20,8 @@ typedef chrono::time_point<Time> TimePoint;
 typedef chrono::milliseconds ms;
 
 struct NetworkData {
-	vector<vector<double>> x;
-	vector<vector<double>> y;
+	vector<Tensor> x;
+	vector<Tensor> y;
 };
 
 class Network {
@@ -30,8 +30,8 @@ class Network {
 	int last; // индекс последнего слоя
 	vector<Layer*> layers; // слои
 
-	vector<double> ForwardTrain(const vector<double> &x); // прямое распространение
-	void Backward(const vector<double> &x, const vector<double> &dout); // обратное распространение ошибки
+	Tensor ForwardTrain(const Tensor &x); // прямое распространение
+	void Backward(const Tensor &x, const Tensor &dout); // обратное распространение ошибки
 	void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 public:
@@ -41,7 +41,7 @@ public:
 	void Print() const; // вывод коэффициентов
 	void Train(const NetworkData &data, LossFunction L, double learningRate, int batchSize, int epochs, int log_period); // обучение
 	
-	vector<double> Forward(const vector<double> &x); // прямое распространение
+	Tensor Forward(const Tensor &x); // прямое распространение
 	void Summary() const;
 };
 
@@ -53,7 +53,7 @@ Network::Network(int inputs) {
 }
 
 // прямое распространение
-vector<double> Network::ForwardTrain(const vector<double> &x) {
+Tensor Network::ForwardTrain(const Tensor &x) {
 	layers[0]->ForwardTrain(x); // выполняем распространение в первом слое
 
 	// распространяем сигналы по остальным слоям
@@ -64,7 +64,7 @@ vector<double> Network::ForwardTrain(const vector<double> &x) {
 }
 
 // обратное распространение ошибки
-void Network::Backward(const vector<double> &x, const vector<double> &dout) {
+void Network::Backward(const Tensor &x, const Tensor &dout) {
 	if (last == 0) {
 		layers[last]->Backward(x, dout, false);
 		return;
@@ -132,8 +132,8 @@ void Network::Train(const NetworkData& data, LossFunction L, double learningRate
 
 		for (int i = 0; i < data.x.size(); i += batchSize) {
 			for (int j = 0; j < batchSize && i + j < data.x.size(); j++) {
-				vector<double> out = ForwardTrain(data.x[i + j]); // выполняем прямое распространение
-				vector<double> dout(outputs); // создаём вектор производных функции потерь
+				Tensor out = ForwardTrain(data.x[i + j]); // выполняем прямое распространение
+				Tensor dout(outputs); // создаём вектор производных функции потерь
 				loss += L(out, data.y[i + j], dout); // вычисляем функцию потерь
 				Backward(data.x[i + j], dout); // выполняем обратное распространение
 			}
@@ -150,7 +150,7 @@ void Network::Train(const NetworkData& data, LossFunction L, double learningRate
 }
 
 // прямое распространение
-vector<double> Network::Forward(const vector<double> &x) {
+Tensor Network::Forward(const Tensor &x) {
 	layers[0]->Forward(x); // выполняем распространение в первом слое
 
 	// распространяем сигналы по остальным слоям

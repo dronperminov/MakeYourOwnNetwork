@@ -2,16 +2,17 @@
 
 #include <iostream>
 #include <vector>
+#include "Tensor.hpp"
 
 using namespace std;
 
-typedef double (*LossFunction)(const vector<double> &y, const vector<double> &t, vector<double> &dout); // указатель на функцию потерь
+typedef double (*LossFunction)(const Tensor &y, const Tensor &t, Tensor &dout); // указатель на функцию потерь
 
 // средне квадратичное отклонение
-double MSE(const vector<double> &y, const vector<double> &t, vector<double> &dout) {
+double MSE(const Tensor &y, const Tensor &t, Tensor &dout) {
 	double loss = 0;
 
-	for (int i = 0; i < y.size(); i++) {
+	for (int i = 0; i < y.Total(); i++) {
 		double e = y[i] - t[i]; // находим разность между элементами
 		dout[i] = 2 * e; // вычисялем производную функции потерь
 		loss += e * e; // добавляем значение функции потерь
@@ -21,10 +22,10 @@ double MSE(const vector<double> &y, const vector<double> &t, vector<double> &dou
 }
 
 // перекрёстная энтропия
-double CrossEntropy(const vector<double> &y, const vector<double> &t, vector<double> &dout) {
+double CrossEntropy(const Tensor &y, const Tensor &t, Tensor &dout) {
 	double loss = 0;
 	
-	for (int i = 0; i < y.size(); i++) {
+	for (int i = 0; i < y.Total(); i++) {
 		dout[i] = -t[i] / y[i]; // вычисялем производную функции потерь
 		loss -= t[i] * log(y[i]); // добавляем значение функции потерь
 	}
@@ -33,10 +34,10 @@ double CrossEntropy(const vector<double> &y, const vector<double> &t, vector<dou
 }
 
 // бинарная перекрёстная энтропия
-double BinaryCrossEntropy(const vector<double> &y, const vector<double> &t, vector<double> &dout) {
+double BinaryCrossEntropy(const Tensor &y, const Tensor &t, Tensor &dout) {
 	double loss = 0;
 	
-	for (int i = 0; i < y.size(); i++) {
+	for (int i = 0; i < y.Total(); i++) {
 		dout[i] = (y[i] - t[i]) / (y[i] * (1 - y[i])); // вычисялем производную функции потерь
 		loss -= t[i] * log(y[i]) + (1 - t[i]) * log(1 - y[i]); // добавляем значение функции потерь
 	}

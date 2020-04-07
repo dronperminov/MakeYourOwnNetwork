@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "Tensor.hpp"
+
 using namespace std;
 
 // загрузка чёрно белых изображений с метками из csv файла
@@ -13,8 +15,8 @@ class DataLoader {
 	vector<string> labels; // метки
 
 	vector<string> SplitLine(const string &line, char delimeter = ',') const; // разбиение строки по разделителю
-	vector<double> PixelsToVector(const vector<string> &values) const; // получение вектора картинки
-	vector<double> LabelToVector(const string &label) const; // получение вектора метки
+	Tensor PixelsToVector(const vector<string> &values) const; // получение вектора картинки
+	Tensor LabelToVector(const string &label) const; // получение вектора метки
 public:
 	DataLoader(const string &path); // создание загрузчика
 	NetworkData LoadData(const string &path); // считывание данных
@@ -67,8 +69,8 @@ vector<string> DataLoader::SplitLine(const string &line, char delimeter) const {
 }
 
 // получение вектора из пикселей
-vector<double> DataLoader::PixelsToVector(const vector<string> &values) const {
-	vector<double> x(width * height, 0);
+Tensor DataLoader::PixelsToVector(const vector<string> &values) const {
+	Tensor x(width * height);
 
 	for (int i = 1; i < values.size(); i++)
 		x[i - 1] = atoi(values[i].c_str()) / 255.0;
@@ -77,8 +79,8 @@ vector<double> DataLoader::PixelsToVector(const vector<string> &values) const {
 }
 
 // получение вектора из метки
-vector<double> DataLoader::LabelToVector(const string &label) const {
-	vector<double> y(labels.size(), 0);
+Tensor DataLoader::LabelToVector(const string &label) const {
+	Tensor y(labels.size());
 
 	for (int i = 0; i < labels.size(); i++) {
 		if (labels[i] == label) {

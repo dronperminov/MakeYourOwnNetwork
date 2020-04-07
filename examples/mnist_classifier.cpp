@@ -5,27 +5,13 @@
 #include "../Network.hpp"
 #include "../utils/DataLoader.hpp"
 
-int Argmax(const vector<double> &x) {
-	int imax = 0;
-
-	for (int i = 1; i < x.size(); i++)
-		if (x[i] > x[imax])
-			imax = i;
-
-	return imax;
-}
-
 double Test(Network &network, const NetworkData& data) {
 	int correct = 0;
 	double total = data.x.size();
 
 	for (int i = 0; i < data.x.size(); i++) {
-		vector<double> y = network.Forward(data.x[i]);
-
-		int imax1 = Argmax(y);
-		int imax2 = Argmax(data.y[i]);
-
-		correct += imax1 == imax2;
+		Tensor y = network.Forward(data.x[i]);
+		correct += y.Argmax() == data.y[i].Argmax();
 	}
 	
 	return correct / total;

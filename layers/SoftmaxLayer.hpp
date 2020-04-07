@@ -8,8 +8,8 @@ class SoftmaxLayer : public Layer {
 public:	
 	SoftmaxLayer(int outputs); // создание слоя
 
-	void Forward(const vector<double> &x); // прямое распространение
-	void Backward(const vector<double> &x, const vector<double> &dout, bool needDx); // обратное распространение
+	void Forward(const Tensor &x); // прямое распространение
+	void Backward(const Tensor &x, const Tensor &dout, bool needDx); // обратное распространение
 
 	void Summary() const; // вывод информации	
 };
@@ -19,7 +19,7 @@ SoftmaxLayer::SoftmaxLayer(int outputs) : Layer(outputs, outputs) {
 }
 
 // прямое распространение
-void SoftmaxLayer::Forward(const vector<double> &x) {
+void SoftmaxLayer::Forward(const Tensor &x) {
 	double sum = 0;
 
 	for (int i = 0; i < outputs; i++) {
@@ -32,7 +32,7 @@ void SoftmaxLayer::Forward(const vector<double> &x) {
 }
 
 // обратное распространение
-void SoftmaxLayer::Backward(const vector<double> &x, const vector<double> &dout, bool needDx) {
+void SoftmaxLayer::Backward(const Tensor &x, const Tensor &dout, bool needDx) {
 	if (!needDx)
 		return;
 
