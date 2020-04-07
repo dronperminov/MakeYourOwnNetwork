@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "Image.hpp"
 
 using namespace std;
 
@@ -26,6 +27,8 @@ public:
 
     int Total() const;
     int Argmax() const;
+
+    void SaveAsImage(const string& name);
 };
 
 Tensor::Tensor(int size) {
@@ -84,4 +87,21 @@ int Tensor::Total() const {
 
 ostream& operator<<(ostream& os, const TensorSize& size) {
     return os << (to_string(size.width) + "x" + to_string(size.height) + "x" + to_string(size.depth));
+}
+
+void Tensor::SaveAsImage(const string& name) {
+    if (size.depth != 1)
+        throw runtime_error("only wb images now");
+
+    Image image(size.width, size.height);
+
+    for (int i = 0; i < size.height; i++) {
+        for (int j = 0; j < size.width; j++) {
+            double value = (*this)(i, j, 0);
+            uint8_t v = min(255, max(0, (int) (value * 255)));
+            image.SetPixel(j, i, v, v, v);
+        }
+    }
+
+    image.Save(name);
 }
