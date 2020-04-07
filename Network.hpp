@@ -8,6 +8,7 @@
 
 #include "utils/LossFunction.hpp"
 #include "Layers/Layer.hpp"
+#include "Layers/MaxPoolingLayer.hpp"
 #include "Layers/FullyConnectedLayer.hpp"
 #include "Layers/DropoutLayer.hpp"
 #include "Layers/ActivationLayer.hpp"
@@ -105,6 +106,14 @@ void Network::AddLayer(const string &config) {
 		outputSize.width = 1;
 		outputSize.height = 1;
 		outputSize.depth = outputs; // обновляем число выходов сети
+	}
+	else if (type == "maxpool") {
+		int scale;
+		ss >> scale;
+
+		layers.push_back(new MaxPoolingLayer(this->outputSize, scale));
+		outputSize.width /= scale;
+		outputSize.height /= scale;
 	}
 	else if (type == "softmax") {
 		layers.push_back(new SoftmaxLayer(this->outputSize));
