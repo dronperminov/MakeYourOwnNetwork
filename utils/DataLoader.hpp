@@ -12,6 +12,7 @@ using namespace std;
 class DataLoader {
 	int width; // ширина изображения
 	int height; // высота изображения
+	int depth; // глубина изображений
 	vector<string> labels; // метки
 
 	vector<string> SplitLine(const string &line, char delimeter = ',') const; // разбиение строки по разделителю
@@ -41,9 +42,10 @@ DataLoader::DataLoader(const string &path) {
 
 	width = stoi(sizes[0]); // получаем ширину
 	height = stoi(sizes[1]); // получаем высоту
+	depth = sizes.size() > 2 ? stoi(sizes[2]) : 1; // получаем глубину
 	labels = SplitLine(labelsStr, ' '); // получаем метки
 
-	cout << "sizes: [" << width << " x " << height << "]" << endl; // выводим размеры
+	cout << "sizes: [" << width << " x " << height << "x" << depth << "]" << endl; // выводим размеры
 	cout << "labels: " << labels.size() << endl; // выводим число меток
 }
 
@@ -70,10 +72,13 @@ vector<string> DataLoader::SplitLine(const string &line, char delimeter) const {
 
 // получение вектора из пикселей
 Tensor DataLoader::PixelsToVector(const vector<string> &values) const {
-	Tensor x(width * height);
+	Tensor x(width, height, depth);
+	int index = 1;
 
-	for (int i = 1; i < values.size(); i++)
-		x[i - 1] = atoi(values[i].c_str()) / 255.0;
+	for (int i = 0; i < height; i++)
+		for (int j = 0; j < width; j++)
+			for (int k = 0; k < depth; k++)
+				x(i, j, k) = atoi(values[index++].c_str()) / 255.0;
 
 	return x;
 }

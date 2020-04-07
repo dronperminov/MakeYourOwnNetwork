@@ -4,11 +4,14 @@
 
 using namespace std;
 
-class Tensor {
+struct TensorSize {
     int width;
     int height;
     int depth;
+};
 
+class Tensor {
+    TensorSize size;
     vector<double> values;
 public:
     Tensor(int size);
@@ -25,17 +28,17 @@ public:
 };
 
 Tensor::Tensor(int size) {
-    width = 1;
-    height = 1;
-    depth = size;
+    this->size.width = 1;
+    this->size.height = 1;
+    this->size.depth = size;
     
-    values = vector<double>(width * height * depth, 0);
+    values = vector<double>(size, 0);
 }
 
 Tensor::Tensor(int width, int height, int depth) {
-    this->width = width;
-    this->height = height;
-    this->depth = depth;
+    size.width = width;
+    size.height = height;
+    size.depth = depth;
 
     values = vector<double>(width * height * depth, 0);
 }
@@ -49,11 +52,11 @@ const double& Tensor::operator[](int index) const {
 }
 
 double& Tensor::operator()(int i, int j, int d) {
-    return values[(i * width + j) * depth + d];
+    return values[(i * size.width + j) * size.depth + d];
 }
 
 const double& Tensor::operator()(int i, int j, int d) const {
-    return values[(i * width + j) * depth + d];
+    return values[(i * size.width + j) * size.depth + d];
 }
 
 int Tensor::Argmax() const {
