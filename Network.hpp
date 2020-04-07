@@ -25,8 +25,8 @@ struct NetworkData {
 };
 
 class Network {
-	int inputs; // число входов
-	int outputs; // число выходов
+	TensorSize inputSize; // входной размер
+	TensorSize outputSize; // выходной размер
 	int last; // индекс последнего слоя
 	vector<Layer*> layers; // слои
 
@@ -35,7 +35,7 @@ class Network {
 	void UpdateWeights(double learningRate); // обновление весовых коэффициентов
 
 public:
-	Network(int inputs); // создание сети
+	Network(int width, int height, int depth); // создание сети
 	
 	void AddLayer(const string &config); // добавление слоя
 	void Print() const; // вывод коэффициентов
@@ -46,9 +46,11 @@ public:
 };
 
 // создание сети
-Network::Network(int inputs) {
-	this->inputs = inputs; // запоминаем число входов
-	this->outputs = inputs; // нет слоёв
+Network::Network(int width, int height, int depth) {
+	this->inputSize.width = width;
+	this->inputSize.height = height;
+	this->inputSize.depth = depth;
+	this->outputSize = inputSize; // нет слоёв
 	this->last = -1; // ещё нет слоёв
 }
 
@@ -93,22 +95,24 @@ void Network::AddLayer(const string &config) {
 	if (type == "activation") {
 		string function;
 		ss >> function;
-		layers.push_back(new ActivationLayer(this->outputs, function)); // добавляем слой
+		layers.push_back(new ActivationLayer(this->outputSize, function)); // добавляем слой
 	}
 	else if (type == "fc") {
 		int outputs;
 		ss >> outputs;
 
-		layers.push_back(new FullyConnectedLayer(this->outputs, outputs)); // добавляем слой
-		this->outputs = outputs; // обновляем число выходов сети
+		layers.push_back(new FullyConnectedLayer(outputSize, outputs)); // добавляем слой
+		outputSize.width = 1;
+		outputSize.height = 1;
+		outputSize.depth = outputs; // обновляем число выходов сети
 	}
 	else if (type == "softmax") {
-		layers.push_back(new SoftmaxLayer(this->outputs));
+		layers.push_back(new SoftmaxLayer(this->outputSize));
 	}
 	else if (type == "dropout") {
 		double p;
 		ss >> p;
-		layers.push_back(new DropoutLayer(this->outputs, p));
+		layers.push_back(new DropoutLayer(this->outputSize, p));
 	}
 	else
 		throw runtime_error("unknown layer '" + type + "'");
@@ -133,7 +137,7 @@ void Network::Train(const NetworkData& data, LossFunction L, double learningRate
 		for (int i = 0; i < data.x.size(); i += batchSize) {
 			for (int j = 0; j < batchSize && i + j < data.x.size(); j++) {
 				Tensor out = ForwardTrain(data.x[i + j]); // выполняем прямое распространение
-				Tensor dout(outputs); // создаём вектор производных функции потерь
+				Tensor dout(outputSize); // создаём вектор производных функции потерь
 				loss += L(out, data.y[i + j], dout); // вычисляем функцию потерь
 				Backward(data.x[i + j], dout); // выполняем обратное распространение
 			}

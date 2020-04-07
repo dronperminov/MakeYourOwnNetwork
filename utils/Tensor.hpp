@@ -15,6 +15,7 @@ class Tensor {
     vector<double> values;
 public:
     Tensor(int size);
+    Tensor(TensorSize size);
     Tensor(int width, int height, int depth);
 
     double& operator[](int index);
@@ -33,6 +34,14 @@ Tensor::Tensor(int size) {
     this->size.depth = size;
     
     values = vector<double>(size, 0);
+}
+
+Tensor::Tensor(TensorSize size) {
+    this->size.width = size.width;
+    this->size.height = size.height;
+    this->size.depth = size.depth;
+
+    values = vector<double>(size.width * size.height * size.depth, 0);
 }
 
 Tensor::Tensor(int width, int height, int depth) {
@@ -71,4 +80,8 @@ int Tensor::Argmax() const {
 
 int Tensor::Total() const {
     return values.size();
+}
+
+ostream& operator<<(ostream& os, const TensorSize& size) {
+    return os << (to_string(size.width) + "x" + to_string(size.height) + "x" + to_string(size.depth));
 }

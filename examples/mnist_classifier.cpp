@@ -22,7 +22,7 @@ int main() {
 	NetworkData trainData = loader.LoadData("../datasets/mnist/mnist_train.csv");
 	NetworkData testData = loader.LoadData("../datasets/mnist/mnist_test.csv");
 
-	Network network(784);
+	Network network(28, 28, 1);
 	network.AddLayer("fc 100");
 	network.AddLayer("activation sigmoid");
 	network.AddLayer("dropout 0.2");

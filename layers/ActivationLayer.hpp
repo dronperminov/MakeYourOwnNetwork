@@ -6,9 +6,10 @@ using namespace std;
 
 class ActivationLayer : public Layer {
 	string function; // тип активационной функции
+	int total;
 
 public:	
-	ActivationLayer(int outputs, const string &function); // создание слоя
+	ActivationLayer(TensorSize outputSize, const string &function); // создание слоя
 
 	void Forward(const Tensor &x); // прямое распространение
 	void Backward(const Tensor &x, const Tensor &dout, bool needDx); // обратное распространение
@@ -16,8 +17,9 @@ public:
 	void Summary() const; // вывод информации
 };
 
-ActivationLayer::ActivationLayer(int outputs, const string &function) : Layer(outputs, outputs) {
+ActivationLayer::ActivationLayer(TensorSize outputSize, const string &function) : Layer(outputSize, outputSize) {
 	this->function = function; // запоминаем функцию активации
+	total = outputSize.width * outputSize.height * outputSize.depth;
 
 	if (function != "sigmoid" && function != "tanh" && function != "relu")
 		throw runtime_error("unknown function '" + function + "'");
@@ -25,7 +27,7 @@ ActivationLayer::ActivationLayer(int outputs, const string &function) : Layer(ou
 
 // прямое распространение
 void ActivationLayer::Forward(const Tensor &x) {
-	for (int i = 0; i < outputs; i++) {
+	for (int i = 0; i < total; i++) {
 		// применяем функцию активации
 		if (function == "sigmoid") {
 			output[i] = 1.0 / (exp(-x[i]) + 1);
@@ -47,12 +49,12 @@ void ActivationLayer::Backward(const Tensor &x, const Tensor &dout, bool needDx)
 	if (!needDx)
 		return;
 
-	for (int i = 0; i < outputs; i++)
+	for (int i = 0; i < total; i++)
 		dx[i] *= dout[i]; // умножаем градиенты активации на выходные градиенты
 }
 
 // вывод информации
 void ActivationLayer::Summary() const {
 	string name = "activation '" + function + "'";
-	cout << "| " << setw(20) << name << " | "  << setw(12) << inputs << " | " << setw(13) << outputs << " | " << setw(13) << (0) << " |" << endl;
+	cout << "| " << setw(20) << name << " | "  << setw(12) << inputSize << " | " << setw(13) << outputSize << " | " << setw(13) << (0) << " |" << endl;
 }

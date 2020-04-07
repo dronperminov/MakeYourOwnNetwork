@@ -9,15 +9,15 @@ using namespace std;
 
 class Layer {
 protected:
-	int inputs; // количество входов
-	int outputs; // количество выходов
+	TensorSize inputSize; // количество входов
+	TensorSize outputSize; // количество выходов
 	
 	Tensor output; // выходной вектор
 	Tensor dx; // градиенты входов
 
 	double GetRnd(double a, double b); // получение случайного числа
 public:
-	Layer(int inputs, int outputs);
+	Layer(TensorSize inputSize, TensorSize outputSize);
 
 	Tensor GetOutput() const; // получение выходов
 	Tensor GetDx() const; // получение градиентов входов
@@ -31,9 +31,9 @@ public:
 	virtual void Summary() const = 0; // вывод информации
 };
 
-Layer::Layer(int inputs, int outputs) : output(outputs), dx(inputs) {
-	this->inputs = inputs; // запоминаем число входов
-	this->outputs = outputs; // запоминаем число выходов
+Layer::Layer(TensorSize inputSize, TensorSize outputSize) : output(outputSize), dx(inputSize) {
+	this->inputSize = inputSize; // запоминаем число входов
+	this->outputSize = outputSize; // запоминаем число выходов
 }
 
 // получение случайного числа

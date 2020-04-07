@@ -5,12 +5,14 @@
 using namespace std;
 
 class FullyConnectedLayer : public Layer {
+	int inputs;
+	int outputs;
 	vector<vector<double>> w; // матрица весовых коэффициентов
 	vector<vector<double>> dw; // градиенты весовых коэффициентов
 
 	void InitializeWeights(); // инициализация весовых коэффициентов
 public:	
-	FullyConnectedLayer(int inputs, int outputs); // создание слоя
+	FullyConnectedLayer(TensorSize inputSize, int outputs); // создание слоя
 
 	void Forward(const Tensor &x); // прямое распространение
 	void Backward(const Tensor &x, const Tensor &dout, bool needDx); // обратное распространение
@@ -20,7 +22,9 @@ public:
 	void Summary() const; // вывод информации
 };
 
-FullyConnectedLayer::FullyConnectedLayer(int inputs, int outputs) : Layer(inputs, outputs) {
+FullyConnectedLayer::FullyConnectedLayer(TensorSize inputSize, int outputs) : Layer(inputSize, { 1, 1, outputs }) {
+	this->inputs = inputSize.width * inputSize.height * inputSize.depth;
+	this->outputs = outputs;
 	w = vector<vector<double>>(outputs, vector<double>(inputs + 1)); // выделяем память под весовые коэффициенты и выходной вектор
 	dw = vector<vector<double>>(outputs, vector<double>(inputs + 1)); // выделяем место под градиенты
 
@@ -96,5 +100,5 @@ void FullyConnectedLayer::PrintWeights() const {
 
 // вывод информации
 void FullyConnectedLayer::Summary() const {
-	cout << "|      fully connected | " << setw(12) << inputs << " | " << setw(13) << outputs << " | " << setw(13) << ((inputs + 1) * outputs) << " |" << endl;
+	cout << "|      fully connected | " << setw(12) << inputSize << " | " << setw(13) << outputSize << " | " << setw(13) << ((inputs + 1) * outputs) << " |" << endl;
 }
